@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Permissions-Policy" content="unload=(), camera=(), microphone=(), geolocation=()">
+    <title>HamroBid</title>
+    <link rel="icon" type="image/svg+xml" href="assets/hamrobid-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap" rel="stylesheet" onerror="this.remove()">
+    <script>
+        let chartRetryCount = 0;
+        function loadChartFallback() {
+            if (chartRetryCount < 2) {
+                chartRetryCount++;
+                setTimeout(() => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
+                    script.onerror = loadChartFallback;
+                    document.head.appendChild(script);
+                }, 1000 * chartRetryCount);
+            } else {
+                window.Chart = { register: () => {}, Chart: function() { return { update: () => {}, destroy: () => {} }; } };
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" onerror="loadChartFallback()"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>♠️ Callbreak ♥️</h1>
+            <div class="subtitle">Dashain Edition Score Calculator</div>
+            <div class="dashain-greeting">शुभ दशैं! | Happy Dashain!</div>
+            <a href="#" class="info-link" onclick="showInfoPage(); return false;">📘 Learn Callbreak | नियमहरू</a>
+        </header>
+
+        <!-- Setup Screen -->
+        <div class="setup-screen active">
+            <div id="resumePrompt"></div>
+
+            <div class="card">
+                <h2 style="color: #8B0000; margin-bottom: 20px;">Game Setup</h2>
+                
+                <div class="preset-names">
+                    <span style="color: #666; font-weight: 600;">Quick Names:</span>
+                    <button class="preset-btn" onclick="setPresetNames(['Mama', 'Bhai', 'Dai', 'Sanu'])">Family Set</button>
+                    <button class="preset-btn" onclick="setPresetNames(['Alpha', 'Bravo', 'Charlie', 'Delta'])">NATO Style</button>
+                    <button class="preset-btn" onclick="setPresetNames(['Ace', 'King', 'Queen', 'Jack'])">Card Champs</button>
+                    <button class="preset-btn" onclick="setPresetNames(['Plato', 'Aristotle', 'Socrates', '‘That Guy’'])">Classics</button>
+                    <button class="preset-btn" onclick="setPresetNames(['404', '500', '302', '200'])">HTTP Squad</button>
+                    <button class="preset-btn" onclick="setPresetNames(['Shelby', '007', 'Walter', 'Tyrion'])">Eclectic Legends</button>
+                    <button class="preset-btn" onclick="setPresetNames(['Player 1', 'Player 2', 'Player 3', 'Player 4'])">Default</button>
+                </div>
+
+                <div class="player-inputs">
+                    <div class="input-group">
+                        <label>Player 1 Name</label>
+                        <input type="text" id="player1" placeholder="Enter name" value="Player 1">
+                    </div>
+                    <div class="input-group">
+                        <label>Player 2 Name</label>
+                        <input type="text" id="player2" placeholder="Enter name" value="Player 2">
+                    </div>
+                    <div class="input-group">
+                        <label>Player 3 Name</label>
+                        <input type="text" id="player3" placeholder="Enter name" value="Player 3">
+                    </div>
+                    <div class="input-group">
+                        <label>Player 4 Name</label>
+                        <input type="text" id="player4" placeholder="Enter name" value="Player 4">
+                    </div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="input-group">
+                        <label>Number of Rounds</label>
+                        <select id="totalRounds">
+                            <option value="5" selected>5 Rounds</option>
+                            <option value="7">7 Rounds</option>
+                            <option value="10">10 Rounds</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>💰 Base Stake per Trick (NPR)</label>
+                        <input type="number" id="baseStake" value="10" min="0" step="5">
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="startGame()">Start Game 🎮</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="color: #8B0000; margin-bottom: 15px;">📚 What is Callbreak?</h3>
+                <p style="line-height: 1.6; color: #333;">
+                    Callbreak is a popular trick-taking card game played during Dashain and other celebrations in Nepal. 
+                    Players bid on the number of tricks they think they can win, then try to achieve their bid. 
+                    Score points by meeting or exceeding your bid, but lose points if you fall short!
+                </p>
+            </div>
+
+            <div class="card">
+                <section id="app-introduction">
+                    <p>
+                        Presenting the <strong>HamroBid</strong>, infused with the spirit of <strong>Dashain</strong>. A seamless fusion of <strong>heritage</strong> and <strong>utility</strong>, it renders the clutter of paper and disputes over tricks obsolete.
+                    </p>
+                    <p>
+                        Crafted for <strong>traditional Nepali gameplay</strong>, this <strong>responsive Score Calculator</strong> makes it effortless to track scores, inviting you to savor every moment with loved ones, especially during the festive season of Dashain.
+                    </p>
+                </section>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen">
+            <div class="card">
+                <div class="round-info">
+                    <h2>Round <span id="currentRound">1</span> of <span id="totalRoundsDisplay">5</span></h2>
+                    <div class="phase-indicator" id="phaseIndicator">Bidding Phase</div>
+                    <div class="pot-display" id="potDisplay">Pot: NPR 0</div>
+                </div>
+
+                <!-- Bidding Phase -->
+                <div id="biddingPhase">
+                    <h3 style="color: #8B0000; margin-bottom: 15px;">📢 Enter Bids (Calls)</h3>
+                    <div class="bid-entry-grid" id="bidInputs"></div>
+                    <div id="bidWarning"></div>
+                    <div class="action-buttons">
+                        <button class="btn" onclick="submitBids()">Submit Bids ✓</button>
+                    </div>
+                </div>
+
+                <!-- Trick Entry Phase -->
+                <div id="trickPhase" style="display: none;">
+                    <h3 style="color: #8B0000; margin-bottom: 15px;">🃏 Enter Tricks Won</h3>
+                    <div class="trick-entry-grid" id="trickInputs"></div>
+                    <div class="action-buttons">
+                        <button class="btn" onclick="submitTricks()">Calculate Scores 🧮</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scoreboard -->
+            <div class="card">
+                <h3 style="color: #8B0000; margin-bottom: 15px;">📊 Current Scoreboard</h3>
+                <div class="scoreboard">
+                    <table id="scoreTable">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Bid</th>
+                                <th>Tricks</th>
+                                <th>Round Score</th>
+                                <th class="cumulative-header">📊 Total Score</th>
+                                <th>💰 Round Money</th>
+                                <th class="cumulative-header">💰 Total Money</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoreTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="card chart-container">
+                <h3 style="color: #8B0000; margin-bottom: 15px;">📈 Score Progression</h3>
+                <div class="chart-wrapper">
+                    <canvas id="scoreChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card chart-container">
+                <h3 style="color: #8B0000; margin-bottom: 15px;">💰 Cumulative Money Progression</h3>
+                <div class="chart-wrapper">
+                    <canvas id="moneyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Round History -->
+            <div class="card history-section">
+                <h3 style="color: #8B0000; margin-bottom: 15px;">📜 Round History</h3>
+                <div id="roundHistory"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="exportGame()">📤 Export CSV</button>
+                <button class="btn btn-secondary" onclick="resetGame()">New Game</button>
+            </div>
+            
+            <div class="card" style="margin-top: 20px;">
+                <h3 style="color: #8B0000; margin-bottom: 15px;">💾 localStorage Feature</h3>
+                <p style="line-height: 1.6; color: #333;">
+                    The application utilizes localStorage, which ensures that even when the page reloads, no data is lost, and players can seamlessly continue their session without interruption.
+                </p>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div class="victory-screen">
+            <div class="card">
+                <div class="winner-announcement" id="winnerText">🏆 Winner 🏆</div>
+                
+                <div class="stats-grid" id="statsGrid"></div>
+
+                <h3 style="color: #8B0000; margin: 30px 0 15px;">Final Standings</h3>
+                <div class="scoreboard">
+                    <table id="finalScoreTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Total Score</th>
+                                <th>💰 Total NPR</th>
+                                <th>Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody id="finalScoreTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn" onclick="resetGame()">Play Again 🎮</button>
+                    <button class="btn btn-secondary" onclick="exportGame()">📤 Export Results</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Page -->
+        <div class="info-page">
+            <div class="info-card">
+                <h2>📘 Callbreak Rules & Culture</h2>
+                <button class="btn btn-secondary" onclick="hideInfoPage()" style="float: right;">← Back to Game</button>
+                <div style="clear: both;"></div>
+
+                <h3>✅ Basic Rules</h3>
+                <p><strong>Objective:</strong> Win exactly or more tricks than you bid each round to score points.</p>
+                
+                <p><strong>How Bidding Works:</strong></p>
+                <ul>
+                    <li>Each player bids (1-13) how many tricks they think they'll win</li>
+                    <li>Spades (♠️) are always trump cards</li>
+                    <li>Higher spades beat lower spades, spades beat all other suits</li>
+                </ul>
+
+                <p><strong>Scoring:</strong></p>
+                <ul>
+                    <li>✅ Meet/exceed bid: +bid points + 0.1 per extra trick</li>
+                    <li>❌ Miss bid: -bid points</li>
+                    <li>Example: Bid 5, win 7 = +5.2 points</li>
+                    <li>Example: Bid 5, win 3 = -5 points</li>
+                </ul>
+
+                <h3>🎴 Nepali Variations & Terms</h3>
+                <div class="nepali-terms">
+                    <p><strong>Double Call (डबल कल):</strong> Bidding 8 or more - risky but shows confidence!</p>
+                    <p><strong>Baaji (बाजी):</strong> The bet/stake - what you're playing for</p>
+                    <p><strong>Jharana (झरना):</strong> Waterfall loss - losing multiple rounds in a row</p>
+                    <p><strong>Tika Laune:</strong> Victory celebration, inspired by Dashain tika tradition</p>
+                </div>
+
+                <h3>🎉 Dashain & Callbreak Culture</h3>
+                <p>Callbreak is a Dashain staple in Nepali households! During the festival:</p>
+                <ul>
+                    <li>🏠 Families gather after receiving tika and jamara</li>
+                    <li>🍱 Snacks like sel roti, sweets, and meat dishes fuel marathon sessions</li>
+                    <li>💰 Small stakes (NPR 10-50) add excitement and bragging rights</li>
+                    <li>👨👩👧👦 Generations play together - teaching kids strategy and math</li>
+                    <li>🌙 Late-night games continue until someone emerges victorious</li>
+                </ul>
+
+                <h3>♟️ Strategy Tips</h3>
+                <div class="tip-box">
+                    <p><strong>🎯 When to bid conservatively:</strong> If you have few spades or weak high cards</p>
+                    <p><strong>🔥 When to go for double call:</strong> Strong spade hand (A, K, Q) or many high cards</p>
+                    <p><strong>🧠 Reading opponents:</strong> Track which spades have been played, adjust your strategy</p>
+                    <p><strong>😈 Psychological play:</strong> Sometimes underbidding can surprise opponents and steal tricks</p>
+                    <p><strong>👥 Family dynamics:</strong> Know your mama's aggressive style vs. your sanu's cautious play!</p>
+                </div>
+
+                <h3>🎊 Fun Facts</h3>
+                <ul>
+                    <li>Callbreak evolved from a game called "Call Bridge" played worldwide</li>
+                    <li>The Nepali version emphasizes spades as permanent trump</li>
+                    <li>Some families play "team mode" - partners 1&3 vs 2&4</li>
+                    <li>Modern Dashain now includes digital scoreboards like this one!</li>
+                </ul>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn" onclick="hideInfoPage()">Return to Game 🎮</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div id="toastContainer"></div>
+    </div>
+
+    <!-- FAB -->
+    <div class="fab" id="fab" aria-label="Connect">
+        <span class="fab-icon">+</span>
+    </div>
+    <div class="fab-menu" id="fabMenu">
+        <a href="https://binayakbartaula.com.np/" target="_blank" aria-label="Personal Website">
+            <span class="menu-icon">🌐</span> Website
+        </a>
+        <a href="https://linktr.ee/binayakbartaula" target="_blank" aria-label="Linktree">
+            <span class="menu-icon">🔗</span> Linktree
+        </a>
+        <a href="https://www.linkedin.com/in/binayakbartaula" target="_blank" aria-label="LinkedIn">
+            <span class="menu-icon">💼</span> LinkedIn
+        </a>
+    </div>
+
+    <script src="js/gameState.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/scoring.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/fab.js"></script>
+</body>
+</html>
