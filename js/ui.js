@@ -167,11 +167,11 @@ function renderRoundHistory() {
                     <tbody>
                         ${round.map(entry => `
                             <tr>
-                                <td><strong>${entry.player}</strong></td>
-                                <td>${entry.bid}${entry.bonus > 0 ? ` (+${entry.bonus})` : ''}</td>
-                                <td>${entry.tricks}</td>
-                                <td class="${entry.score >= 0 ? 'score-positive' : 'score-negative'}">${entry.score > 0 ? '+' : ''}${entry.score.toFixed(1)}</td>
-                                <td class="${entry.money >= 0 ? 'score-positive' : 'score-negative'}">NPR ${entry.money > 0 ? '+' : ''}${entry.money.toFixed(0)}</td>
+                                <td data-label="Player"><strong>${entry.player}</strong></td>
+                                <td data-label="Bid">${entry.bid}${entry.bonus > 0 ? ` (+${entry.bonus})` : ''}</td>
+                                <td data-label="Tricks">${entry.tricks}</td>
+                                <td data-label="Score" class="${entry.score >= 0 ? 'score-positive' : 'score-negative'}">${entry.score > 0 ? '+' : ''}${entry.score.toFixed(1)}</td>
+                                <td data-label="Money" class="${entry.money >= 0 ? 'score-positive' : 'score-negative'}">NPR ${entry.money > 0 ? '+' : ''}${entry.money.toFixed(0)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
