@@ -552,19 +552,38 @@ tr:hover {
 }
 
 @media (max-width: 480px) {
-    /* Extra small screens */
+    /* Critical bidding fixes for real devices */
     .player-card {
-        padding: 10px;
-    }
-    
-    .player-card h3 {
-        font-size: 1.1em;
+        padding: 8px;
+        width: 100%;
+        box-sizing: border-box;
         margin-bottom: 8px;
     }
     
+    .player-card h3 {
+        font-size: 1em;
+        margin-bottom: 6px;
+    }
+    
+    .input-group {
+        margin-bottom: 6px;
+        width: 100%;
+    }
+    
     .input-group label {
-        font-size: 0.95em;
-        margin-bottom: 4px;
+        font-size: 0.9em;
+        margin-bottom: 3px;
+    }
+    
+    .player-card input {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 12px 10px !important;
+        margin: 0 !important;
+        font-size: 16px !important;
+        min-height: 44px !important;
+        border: 2px solid #FFD700;
+        border-radius: 6px;
     }
     
     table {
@@ -581,7 +600,24 @@ tr:hover {
     
     .earnings-preview {
         font-size: 0.8em;
-        padding: 8px;
+        padding: 6px;
+        margin-top: 6px;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Very small phones */
+    .bid-entry-grid, .trick-entry-grid {
+        gap: 6px;
+    }
+    
+    .player-card {
+        padding: 6px;
+    }
+    
+    .player-card input {
+        padding: 10px 8px !important;
+        font-size: 15px !important;
     }
 }
 
