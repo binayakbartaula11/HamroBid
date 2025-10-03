@@ -28,11 +28,19 @@ function startGame() {
     gameState.potTotal = 0;
     gameState.startTime = Date.now();
 
+    // Clear resume prompt to prevent confusion
+    const resumePrompt = document.getElementById('resumePrompt');
+    if (resumePrompt) {
+        resumePrompt.innerHTML = '';
+    }
+
     document.querySelector('.setup-screen').classList.remove('active');
     document.querySelector('.game-screen').classList.add('active');
     
     document.getElementById('totalRoundsDisplay').textContent = gameState.totalRounds;
     document.getElementById('currentRound').textContent = gameState.currentRound;
+    document.getElementById('phaseIndicator').textContent = 'Bidding Phase';
+    document.getElementById('potDisplay').textContent = 'Pot: NPR 0';
 
     renderBidInputs();
     updateScoreTable();
@@ -71,7 +79,7 @@ function resetGame() {
         resumePrompt.innerHTML = '';
     }
 
-    // Clear all table bodies
+    // Clear all table bodies and UI elements
     const scoreTableBody = document.getElementById('scoreTableBody');
     if (scoreTableBody) {
         scoreTableBody.innerHTML = '';
@@ -87,6 +95,23 @@ function resetGame() {
         roundHistory.innerHTML = '';
     }
 
+    // Clear bid and trick input containers
+    const bidInputs = document.getElementById('bidInputs');
+    if (bidInputs) {
+        bidInputs.innerHTML = '';
+    }
+    
+    const trickInputs = document.getElementById('trickInputs');
+    if (trickInputs) {
+        trickInputs.innerHTML = '';
+    }
+
+    // Reset phase displays
+    document.getElementById('biddingPhase').style.display = 'block';
+    document.getElementById('trickPhase').style.display = 'none';
+    document.getElementById('phaseIndicator').textContent = 'Bidding Phase';
+    document.getElementById('potDisplay').textContent = 'Pot: NPR 0';
+
     // Reset all screens
     document.querySelector('.setup-screen').classList.add('active');
     document.querySelector('.game-screen').classList.remove('active');
@@ -98,7 +123,10 @@ function resetGame() {
 
 // Initialize on DOM ready (avoids unload policy issues)
 window.addEventListener('DOMContentLoaded', function() {
-    loadSavedGame();
+    // Only load saved game if we're on the setup screen
+    if (document.querySelector('.setup-screen').classList.contains('active')) {
+        loadSavedGame();
+    }
 });
 
 // Auto-save on page visibility change (replaces unload)
