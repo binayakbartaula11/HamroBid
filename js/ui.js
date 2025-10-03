@@ -55,11 +55,11 @@ function renderBidInputs() {
             <h3>${player.name}</h3>
             <div class="input-group">
                 <label>Bid (1-13)</label>
-                <input type="number" id="bid${index}" min="1" max="13" value="${defaultBids[index]}" oninput="checkBidTotal()">
+                <input type="number" id="bid${index}" min="1" max="13" value="${defaultBids[index]}" oninput="checkBidTotal()" onkeypress="handleBidKeyPress(event)" tabindex="${index + 1}">
             </div>
             <div class="input-group" style="margin-top: 10px;">
                 <label>💰 Bonus Bid (NPR) - Optional</label>
-                <input type="number" id="bonus${index}" min="0" value="0" step="10">
+                <input type="number" id="bonus${index}" min="0" value="0" step="10" onkeypress="handleBidKeyPress(event)" tabindex="${index + 5}">
             </div>
         `;
         container.appendChild(card);
@@ -93,7 +93,7 @@ function renderTrickInputs() {
             </div>
             <div class="input-group" style="margin-top: 10px;">
                 <label>Tricks Won (0-13)</label>
-                <input type="number" id="trick${index}" min="0" max="13" value="0">
+                <input type="number" id="trick${index}" min="0" max="13" value="0" onkeypress="handleTrickKeyPress(event)" tabindex="${index + 1}">
             </div>
         `;
         container.appendChild(card);
@@ -210,5 +210,20 @@ function hideInfoPage() {
         document.querySelector('.game-screen').classList.add('active');
     } else {
         document.querySelector('.setup-screen').classList.add('active');
+    }
+}
+
+// Keyboard event handlers
+function handleBidKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        submitBids();
+    }
+}
+
+function handleTrickKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        submitTricks();
     }
 }
