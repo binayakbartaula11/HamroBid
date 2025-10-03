@@ -107,21 +107,14 @@ function calculateRoundScores(tricks) {
         });
     });
 
-    // Distribute pot to successful players
-    if (successfulPlayers.length > 0 && gameState.potTotal > 0) {
-        const potShare = gameState.potTotal / successfulPlayers.length;
-        successfulPlayers.forEach(index => {
-            gameState.players[index].totalMoney += potShare;
-            gameState.players[index].roundMoney[gameState.players[index].roundMoney.length - 1] += potShare;
-            // Update roundData for accurate history
-            roundData[index].money += potShare;
-            roundData[index].totalMoney = gameState.players[index].totalMoney;
-        });
-        showToast(`💰 Pot of NPR ${gameState.potTotal} distributed!`, 'success');
-        gameState.potTotal = 0;
-    }
-
     gameState.roundHistory.push(roundData);
+    
+    // Only distribute pot at the end of the game or when specifically triggered
+    // For now, let pot accumulate across rounds
+    if (gameState.potTotal > 0) {
+        showToast(`💰 Current pot: NPR ${gameState.potTotal} (from failed bonus bids)`, 'info');
+    }
+    
     updateScoreTable();
     updateCharts();
     renderRoundHistory();
@@ -149,6 +142,17 @@ function nextRound() {
 }
 
 function endGame() {
+    // Distribute final pot to the winner
+    if (gameState.potTotal > 0) {
+        const sortedByScore = [...gameState.players].sort((a, b) => b.totalScore - a.totalScore);
+        const winner = sortedByScore[0];
+        const winnerIndex = gameState.players.findIndex(p => p.name === winner.name);
+        
+        gameState.players[winnerIndex].totalMoney += gameState.potTotal;
+        showToast(`🏆 Final pot of NPR ${gameState.potTotal} goes to winner ${winner.name}!`, 'success');
+        gameState.potTotal = 0;
+    }
+    
     // Clear saved game when ending
     localStorage.removeItem('callbreakSave');
     document.querySelector('.game-screen').classList.remove('active');
