@@ -221,9 +221,22 @@ input:focus, select:focus {
 
 .bid-entry-grid, .trick-entry-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 15px;
     margin-bottom: 20px;
+}
+
+@media (max-width: 1024px) {
+    .bid-entry-grid, .trick-entry-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .bid-entry-grid, .trick-entry-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
 
 .player-card {
@@ -232,6 +245,8 @@ input:focus, select:focus {
     border: 3px solid #FFD700;
     border-radius: 10px;
     transition: all 0.3s;
+    min-width: 0; /* Prevents flex item overflow */
+    word-wrap: break-word;
 }
 
 .player-card.leader {
@@ -257,6 +272,23 @@ input:focus, select:focus {
 
 .scoreboard {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+    .scoreboard {
+        font-size: 0.85em;
+    }
+    
+    th, td {
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+    
+    th {
+        font-size: 0.8em;
+    }
 }
 
 table {
@@ -438,10 +470,81 @@ tr:hover {
 .history-table {
     width: 100%;
     font-size: 0.9em;
+    overflow-x: auto;
+    display: block;
+    white-space: nowrap;
+}
+
+.history-table thead,
+.history-table tbody,
+.history-table th,
+.history-table td,
+.history-table tr {
+    display: block;
+}
+
+.history-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+.history-table tr {
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fafafa;
 }
 
 .history-table td {
-    padding: 10px;
+    border: none;
+    position: relative;
+    padding: 8px 8px 8px 25%;
+    text-align: left;
+    white-space: normal;
+}
+
+.history-table td:before {
+    content: attr(data-label) ": ";
+    position: absolute;
+    left: 6px;
+    width: 20%;
+    padding-right: 10px;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #8B0000;
+}
+
+@media (min-width: 769px) {
+    .history-table,
+    .history-table thead,
+    .history-table tbody,
+    .history-table th,
+    .history-table td,
+    .history-table tr {
+        display: table;
+    }
+    
+    .history-table thead tr {
+        position: static;
+    }
+    
+    .history-table tr {
+        border: none;
+        margin: 0;
+        padding: 0;
+        background: transparent;
+    }
+    
+    .history-table td {
+        padding: 10px;
+        text-align: left;
+    }
+    
+    .history-table td:before {
+        display: none;
+    }
 }
 
 .toast {
@@ -487,15 +590,80 @@ tr:hover {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
     h1 {
         font-size: 2em;
     }
-    .player-inputs, .bid-entry-grid, .trick-entry-grid {
-        grid-template-columns: 1fr;
+    
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
     }
+    
+    .player-inputs {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
     .round-info {
         flex-direction: column;
         text-align: center;
+        gap: 8px;
+    }
+    
+    .round-info h2 {
+        font-size: 1.3em;
+    }
+    
+    .preset-names {
+        justify-content: center;
+    }
+    
+    .preset-btn {
+        font-size: 0.85em;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 5px;
+    }
+    
+    .card {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
+    .player-card {
+        padding: 12px;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 1em;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    input, select {
+        padding: 10px 12px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .settings-grid {
+        grid-template-columns: 1fr;
     }
 }
 
